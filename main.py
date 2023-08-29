@@ -4,15 +4,15 @@ import requests
 def detect_vulnerabilities(response_text):
     vulnerabilities = []
     if "error" in response_text.lower():
-        vulnerabilities.append("Error-based SQL Injection")
+        vulnerabilities.append(("Error-based SQL Injection", "error"))
     if "welcome" in response_text.lower():
-        vulnerabilities.append("Boolean-based SQL Injection")
+        vulnerabilities.append(("Boolean-based SQL Injection", "welcome"))
     if "wait" in response_text.lower():
-        vulnerabilities.append("Time-based Blind SQL Injection")
+        vulnerabilities.append(("Time-based Blind SQL Injection", "wait"))
     if "union" in response_text.lower():
-        vulnerabilities.append("Union-based SQL Injection")
+        vulnerabilities.append(("Union-based SQL Injection", "union"))
     if "nslookup" in response_text.lower():
-        vulnerabilities.append("Out-of-Band SQL Injection")
+        vulnerabilities.append(("Out-of-Band SQL Injection", "nslookup"))
     return vulnerabilities
 
 def test_sqli_vulnerability(url, parameter, payloads):
@@ -23,7 +23,10 @@ def test_sqli_vulnerability(url, parameter, payloads):
 
         if detected_vulnerabilities:
             print(f"Payload: {payload_name}")
-            print(f"Detected Vulnerabilities: {', '.join(detected_vulnerabilities)}")
+            print("Detected Vulnerabilities:")
+            for vulnerability, keyword in detected_vulnerabilities:
+                print(f"  - {vulnerability} (Keyword: {keyword})")
+            print(f"Exact Payload: {payload}")
             print("=" * 50)
 
 def main():
