@@ -1,5 +1,8 @@
 import argparse
 import requests
+from colorama import Fore, Style, init
+
+init(autoreset=True)  # Initialize colorama
 
 def detect_vulnerabilities(response_text):
     vulnerabilities = []
@@ -25,7 +28,11 @@ def test_sqli_vulnerability(url, parameter, payloads):
             print(f"Payload: {payload_name}")
             print("Detected Vulnerabilities:")
             for vulnerability, keyword in detected_vulnerabilities:
-                print(f"  - {vulnerability} (Keyword: {keyword})")
+                if keyword in payload.lower():
+                    colored_payload = payload.replace(keyword, f"{Fore.RED}{keyword}{Style.RESET_ALL}")
+                    print(f"  - {vulnerability} (Keyword: {colored_payload})")
+                else:
+                    print(f"  - {vulnerability} (Keyword: {keyword})")
             print(f"Exact Payload: {payload}")
             print("=" * 50)
 
