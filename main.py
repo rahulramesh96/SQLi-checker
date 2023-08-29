@@ -20,13 +20,11 @@ def test_sqli_vulnerability(url, parameter, payloads):
         test_url = f"{url}?{parameter}={payload}"
         response = requests.get(test_url)
         detected_vulnerabilities = detect_vulnerabilities(response.text)
-        
-        print(f"Payload: {payload_name}")
+
         if detected_vulnerabilities:
+            print(f"Payload: {payload_name}")
             print(f"Detected Vulnerabilities: {', '.join(detected_vulnerabilities)}")
-        else:
-            print("No SQL Injection vulnerabilities detected.")
-        print("=" * 50)
+            print("=" * 50)
 
 def main():
     parser = argparse.ArgumentParser(description="SQL Injection Vulnerability Tester")
